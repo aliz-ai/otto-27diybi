@@ -1,0 +1,5 @@
+project_id   = "aliz-diybi-ia"
+region       = "europe-west1"
+zone         = "europe-west1-b"
+env          = "dev"
+vpc_ip_range = "10.100.1.0/24"
