@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "notebooks-bucket" {
-  name          = "${var.project_id}-notebooks-bucket"
+  name          = "${var.project_id}-users-backup"
   location      = "EU"
   force_destroy = true
   versioning {
@@ -7,6 +7,28 @@ resource "google_storage_bucket" "notebooks-bucket" {
   }
 }
 
+resource "google_storage_bucket" "commons" {
+  name          = "${var.project_id}-commons"
+  location      = "EU"
+  force_destroy = true
+  versioning {
+    enabled = true
+  }
+}
+resource "google_storage_bucket" "team-backup" {
+  name          = "${var.project_id}-team-backup-loader"
+  location      = "EU"
+  force_destroy = true
+
+  lifecycle_rule {
+    condition {
+      age = 28
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
 resource "random_id" "instance_id" {
   byte_length = 8
 }
