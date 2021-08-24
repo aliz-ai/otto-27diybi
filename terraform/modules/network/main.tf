@@ -108,9 +108,4 @@ resource "google_compute_firewall" "allow_iap_ssh" {
       "22"
     ]
   }
-
-  target_tags = [
-    "iap-ssh",
-    "bastion"
-  ]
 }
