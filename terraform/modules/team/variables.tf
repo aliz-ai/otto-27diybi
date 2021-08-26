@@ -4,3 +4,4 @@ variable "label" {}
 variable "sa_name" {}
 variable "display_name" {}
 variable "roles" {}
+variable "members" {}

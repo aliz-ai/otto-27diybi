@@ -30,6 +30,14 @@ resource "google_service_account" "team_sa" {
   display_name = var.display_name
 }
 
+resource "google_service_account_iam_member" "team-account-iam" {
+  service_account_id = google_service_account.team_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  #member   = "user:taufik.romdony@aliz.ai"
+  for_each = toset(var.members)
+  member     = each.key
+}
+
 resource "google_project_iam_member" "team_sa_role" {
   for_each = toset(var.roles)
   role     = each.key
