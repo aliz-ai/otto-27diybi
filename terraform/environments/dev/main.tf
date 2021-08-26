@@ -17,7 +17,7 @@ module "team-level" {
   sa_name      = local.sa_name
   display_name = local.display_name
   roles        = local.roles
-  members = local.team_members
+  members      = local.team_members
 
 }
 

@@ -1,4 +1,4 @@
-resource "google_storage_bucket" "team-collaboration" {
+resource "google_storage_bucket" "team_collaboration" {
   name          = "${var.team}-collaboration"
   location      = "EU"
   force_destroy = true
@@ -30,16 +30,36 @@ resource "google_service_account" "team_sa" {
   display_name = var.display_name
 }
 
-resource "google_service_account_iam_member" "team-account-iam" {
+resource "google_service_account_iam_member" "team_account_iam" {
   service_account_id = google_service_account.team_sa.name
   role               = "roles/iam.serviceAccountUser"
-  #member   = "user:taufik.romdony@aliz.ai"
-  for_each = toset(var.members)
-  member     = each.key
+  for_each           = toset(var.members)
+  member             = each.key
 }
 
 resource "google_project_iam_member" "team_sa_role" {
   for_each = toset(var.roles)
   role     = each.key
   member   = "serviceAccount:${google_service_account.team_sa.email}"
+}
+
+# Team service accounts (read) diy-bi-commons bucket
+resource "google_storage_bucket_iam_binding" "commons" {
+  bucket  = "${var.project_id}-commons"
+  role    = "roles/storage.objectViewer"
+  members = ["serviceAccount:${google_service_account.team_sa.email}"]
+}
+
+# Team service accounts (read) team-collaboration bucket
+resource "google_storage_bucket_iam_binding" "team_collaboration" {
+  bucket  = "${var.team}-collaboration"
+  role    = "roles/storage.objectViewer"
+  members = ["serviceAccount:${google_service_account.team_sa.email}"]
+}
+
+# Team service accounts (read) team-backup bucket
+resource "google_storage_bucket_iam_binding" "team_backup" {
+  bucket  = "${var.team}-backup"
+  role    = "roles/storage.objectAdmin"
+  members = ["serviceAccount:${google_service_account.team_sa.email}"]
 }

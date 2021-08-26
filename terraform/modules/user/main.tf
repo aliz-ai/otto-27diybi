@@ -63,8 +63,8 @@ resource "google_notebooks_instance" "instance" {
   labels              = var.label
   post_startup_script = "gs://${var.commons_bucket}/shutdown_script.sh"
 
-  #no_public_ip    = true
-  #no_proxy_access = true
+  no_public_ip    = true
+  no_proxy_access = true
 
   network = var.network
   subnet  = var.subnet
@@ -78,6 +78,10 @@ resource "google_notebooks_instance" "instance" {
     framework               = "NumPy/SciPy/scikit-learn"
     installed-extensions    = "jupyterlab_bigquery-latest.tar.gz,jupyterlab_gcsfilebrowser-latest.tar.gz"
     shutdown-script         = "/opt/deeplearning/bin/shutdown_script.sh"
+    notebooks-api           = "PROD"
+    report-system-health    = "true"
+    title                   = "Base.CPU"
+    version                 = "78"
   }
   depends_on = [google_service_networking_connection.private_vpc_connection]
 }
@@ -93,7 +97,7 @@ resource "google_storage_bucket" "team-backup" {
   lifecycle_rule {
     condition {
       age                = 28
-      num_newer_versions = 10
+      num_newer_versions = 100
     }
     action {
       type = "Delete"
