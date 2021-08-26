@@ -28,6 +28,10 @@ locals {
     "roles/monitoring.viewer"
   ]
 
+  team_members = [
+    "user:taufik.romdony@aliz.ai",
+    "group:ml@aliz.ai"
+  ]
 }
 
 # static team & infrastructure config
