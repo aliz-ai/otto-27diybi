@@ -49,7 +49,7 @@ resource "google_compute_firewall" "allow_iap_ssh" {
 
 resource "google_notebooks_instance" "instance" {
   provider     = google-beta
-  name         = "${var.team}-notebook"
+  name         = "${var.team}-${var.username}-notebook"
   location     = var.location
   machine_type = var.instance_type
 

@@ -38,6 +38,7 @@ locals {
 locals {
   team       = "etwas"
   module     = "003-113"
+  user       = "taufik"
   project_id = "aliz-diybi-ia"
   region     = "europe-west1"
   zone       = "${local.region}-b"

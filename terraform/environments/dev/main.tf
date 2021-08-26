@@ -34,5 +34,6 @@ module "user-level" {
   commons_bucket = "${local.project_id}-commons"
   network        = local.network_id
   subnet         = local.subnet_id
+  username      = local.user
 
 }

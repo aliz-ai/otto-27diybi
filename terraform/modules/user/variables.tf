@@ -1,5 +1,6 @@
 variable "project_id" {}
 variable "team" {}
+variable "username" {}
 variable "location" {}
 variable "instance_type" {}
 variable "gpu_type" {}
