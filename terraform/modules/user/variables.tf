@@ -1,4 +1,5 @@
 variable "project_id" {}
+variable "region" {}
 variable "team" {}
 variable "username" {}
 variable "location" {}

@@ -25,6 +25,7 @@ module "user-level" {
   source = "../../modules/user"
 
   project_id     = local.project
+  region         = local.region
   team           = local.team
   label          = local.labels
   location       = local.zone
@@ -34,6 +35,6 @@ module "user-level" {
   commons_bucket = "${local.project_id}-commons"
   network        = local.network_id
   subnet         = local.subnet_id
-  username      = local.user
+  username       = local.user
 
 }

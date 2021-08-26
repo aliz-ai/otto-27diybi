@@ -1,34 +1,3 @@
-# We need to allocate an IP block for private IPs. We want everything in the VPC
-# to have a private IP. This improves security and latency, since requests to
-# private IPs are routed through Google's network, not the Internet.
-
-resource "google_compute_global_address" "private_ip_block" {
-  name         = "private-ip-block"
-  description  = "A block of private IP addresses that are accessible only from within the VPC."
-  purpose      = "VPC_PEERING"
-  address_type = "INTERNAL"
-  ip_version   = "IPV4"
-  # We don't specify a address range because Google will automatically assign one for us.
-  prefix_length = 20
-  # ~4k IPs
-  network = var.network
-}
-
-# This enables private services access. This makes it possible for instances
-# within the VPC and Google services to communicate exclusively using internal
-# IP addresses. Details here:
-#   https://cloud.google.com/sql/docs/postgres/configure-private-services-access
-
-resource "google_service_networking_connection" "private_vpc_connection" {
-  network = var.network
-  service = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [
-    google_compute_global_address.private_ip_block.name
-  ]
-}
-
-# We'll need this to connect to the AI Notebook Proxy.
-
 resource "google_compute_firewall" "allow_iap_ssh" {
   name        = "allow-iap-ssh"
   description = "Allow SSH ingress from iap"
@@ -46,6 +15,38 @@ resource "google_compute_firewall" "allow_iap_ssh" {
   }
 }
 
+resource "google_compute_router" "router" {
+  name    = "rtr-${var.team}"
+  region  = var.region
+  network = var.network
+
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_address" "nat_address" {
+  name         = "nat-ip-${var.team}"
+  address_type = "EXTERNAL"
+}
+
+resource "google_compute_router_nat" "nat" {
+  name                                = "nat-gw-${var.team}"
+  router                              = google_compute_router.router.name
+  region                              = google_compute_router.router.region
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm                    = 4096
+  nat_ip_allocate_option              = "MANUAL_ONLY"
+  nat_ips = [
+    google_compute_address.nat_address.self_link
+  ]
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
 
 resource "google_notebooks_instance" "instance" {
   provider     = google-beta
@@ -83,7 +84,6 @@ resource "google_notebooks_instance" "instance" {
     title                   = "Base.CPU"
     version                 = "78"
   }
-  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_storage_bucket" "team-backup" {
