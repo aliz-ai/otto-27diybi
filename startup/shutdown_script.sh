@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Download the script that sets the labels for the BigQuery magics
-gsutil cp gs://mt-otto-startup/00startup.py ~/.ipython/profile_default/startup/00startup.py
+export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
+gsutil cp gs://${PROJECT_ID}-commons/00startup.py ~/.ipython/profile_default/startup/00startup.py
 # Number of sequential checks when the instance had utilization below the threshold.
 COUNTER=0
 # If actual CPU utilization is below this threshold script will increase the counter.
