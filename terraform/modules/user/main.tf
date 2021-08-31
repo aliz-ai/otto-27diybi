@@ -74,7 +74,7 @@ resource "google_notebooks_instance" "instance" {
 
   metadata = {
     proxy-mode              = "service_account"
-    gcs-data-bucket         = "${var.team}-backup"
+    gcs-data-bucket         = "${var.user}-backup"
     enable-guest-attributes = "true"
     framework               = "NumPy/SciPy/scikit-learn"
     installed-extensions    = "jupyterlab_bigquery-latest.tar.gz,jupyterlab_gcsfilebrowser-latest.tar.gz"
@@ -84,8 +84,8 @@ resource "google_notebooks_instance" "instance" {
   }
 }
 
-resource "google_storage_bucket" "team-backup" {
-  name          = "${var.team}-backup"
+resource "google_storage_bucket" "user-backup" {
+  name          = "${var.user}-backup"
   location      = "EU"
   force_destroy = true
   labels        = var.label
