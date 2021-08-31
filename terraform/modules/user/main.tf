@@ -49,8 +49,9 @@ resource "google_compute_router_nat" "nat" {
 }
 
 resource "google_notebooks_instance" "instance" {
+  for_each     = var.group_members
+  name         = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-notebook"
   provider     = google-beta
-  name         = "${var.team}-${var.username}-notebook"
   location     = var.location
   machine_type = var.instance_type
 
@@ -74,7 +75,7 @@ resource "google_notebooks_instance" "instance" {
 
   metadata = {
     proxy-mode              = "service_account"
-    gcs-data-bucket         = "${var.user}-backup"
+    gcs-data-bucket         = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
     enable-guest-attributes = "true"
     framework               = "NumPy/SciPy/scikit-learn"
     installed-extensions    = "jupyterlab_bigquery-latest.tar.gz,jupyterlab_gcsfilebrowser-latest.tar.gz"
@@ -85,7 +86,8 @@ resource "google_notebooks_instance" "instance" {
 }
 
 resource "google_storage_bucket" "user-backup" {
-  name          = "${var.user}-backup"
+  for_each      = var.group_members
+  name          = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
   location      = "EU"
   force_destroy = true
   labels        = var.label

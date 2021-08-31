@@ -9,3 +9,6 @@ variable "label" {}
 variable "commons_bucket" {}
 variable "network" {}
 variable "subnet" {}
+variable "group_members" {
+  type = set(string)
+}
