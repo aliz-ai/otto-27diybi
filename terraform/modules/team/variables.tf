@@ -1,5 +1,6 @@
 variable "project_id" {}
 variable "team" {}
+variable "user" {}
 variable "label" {}
 variable "sa_name" {}
 variable "display_name" {}

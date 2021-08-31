@@ -57,9 +57,9 @@ resource "google_storage_bucket_iam_binding" "team_collaboration" {
   members = ["serviceAccount:${google_service_account.team_sa.email}"]
 }
 
-# Team service accounts (read) team-backup bucket
-resource "google_storage_bucket_iam_binding" "team_backup" {
-  bucket  = "${var.team}-backup"
+# Team service accounts (read) user-backup bucket
+resource "google_storage_bucket_iam_binding" "user_backup" {
+  bucket  = "${var.user}-backup"
   role    = "roles/storage.objectAdmin"
   members = ["serviceAccount:${google_service_account.team_sa.email}"]
 }
