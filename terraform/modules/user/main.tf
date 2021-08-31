@@ -81,8 +81,6 @@ resource "google_notebooks_instance" "instance" {
     shutdown-script         = "/opt/deeplearning/bin/shutdown_script.sh"
     notebooks-api           = "PROD"
     report-system-health    = "true"
-    title                   = "Base.CPU"
-    version                 = "78"
   }
 }
 
