@@ -30,13 +30,47 @@ locals {
     "user:taufik.romdony@aliz.ai",
     "group:ml@aliz.ai"
   ]
+  groups = {
+    "ml@aliz.ai" = {
+      members = [
+        "norbert.liki@aliz.ai",
+        "tamas.moricz@aliz.ai"
+      ],
+    },
+    "infra@aliz.ai" = {
+      members = [
+        "taufik.romdony@aliz.ai",
+      ],
+    }
+  }
+
+  group_emails = toset([
+    for group_email, group_definition in local.groups :
+    group_email
+  ])
+
+  group_members = flatten([
+    for group_email, group_definition in local.groups : [
+      for member in group_definition.members :
+      member
+    ]
+  ])
+
+  user_group_mappings = flatten([
+    for group_email, group_definition in local.groups : [
+      for member in group_definition.members :
+      {
+        group_email = group_email
+        user_id     = member
+      }
+    ]
+  ])
 }
 
 # static team & infrastructure config
 locals {
   team       = "etwas"
   module     = "003-113"
-  user       = "taufik"
   project_id = "aliz-diybi-ia"
   region     = "europe-west1"
   zone       = "${local.region}-b"

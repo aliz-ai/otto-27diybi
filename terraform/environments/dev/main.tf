@@ -20,7 +20,6 @@ module "team-level" {
   display_name = local.display_name
   roles        = local.roles
   members      = local.team_members
-
 }
 
 module "user-level" {
@@ -30,6 +29,7 @@ module "user-level" {
   region         = local.region
   team           = local.team
   user           = local.user
+  group_members  = local.group_members
   label          = local.labels
   location       = local.zone
   instance_type  = local.instance_type
