@@ -6,8 +6,6 @@ locals {
   cron_pattern_backup = "0 0 22 * *"
   timezone            = "Europe/Berlin"
   instance_type       = "n1-standard-2"
-  gpu_type            = "NVIDIA_TESLA_T4"
-  gpu_count           = 1
   commons_bucket      = "${local.project_id}-commons"
 
   gcs_config_files = [

@@ -4,8 +4,6 @@ variable "team" {}
 variable "username" {}
 variable "location" {}
 variable "instance_type" {}
-variable "gpu_type" {}
-variable "gpu_count" {}
 variable "label" {}
 variable "commons_bucket" {}
 variable "network" {}

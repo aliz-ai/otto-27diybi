@@ -30,8 +30,6 @@ module "user-level" {
   label          = local.labels
   location       = local.zone
   instance_type  = local.instance_type
-  gpu_type       = local.gpu_type
-  gpu_count      = local.gpu_count
   commons_bucket = "${local.project_id}-commons"
   network        = local.network_id
   subnet         = local.subnet_id
