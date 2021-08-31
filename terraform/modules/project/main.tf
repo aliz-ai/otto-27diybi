@@ -87,7 +87,7 @@ resource "google_cloud_scheduler_job" "job" {
   schedule         = var.cron_pattern_backup
   time_zone        = var.timezone
   attempt_deadline = "320s"
-  region           = "europe-west1"
+  region           = var.region
 
   http_target {
     http_method = "POST"
