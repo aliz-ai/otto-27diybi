@@ -23,7 +23,6 @@ resource "google_storage_bucket_object" "startup-files" {
   content    = file("${path.root}/../../../startup/${each.value}")
   depends_on = [google_storage_bucket.commons]
 }
-
 resource "google_storage_bucket" "cf-bucket" {
   name = "${var.project_id}-cf-bucket"
 }
@@ -39,6 +38,13 @@ resource "google_storage_bucket_object" "archive" {
   bucket     = google_storage_bucket.cf-bucket.name
   source     = "${path.root}/../../../generated/notebook_backup.zip"
   depends_on = [google_storage_bucket.cf-bucket]
+}
+
+resource "google_storage_bucket_object" "archive-commons" {
+  name       = "${data.archive_file.notebook_backup.output_md5}.zip"
+  bucket     = google_storage_bucket.commons.name
+  source     = "${path.root}/../../../generated/notebook_backup.zip"
+  depends_on = [google_storage_bucket.commons]
 }
 
 resource "google_service_account" "cf-notebook-backup-sa" {
