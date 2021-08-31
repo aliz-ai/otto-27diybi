@@ -2,6 +2,7 @@ module "project-level" {
   source = "../../modules/project"
 
   project_id          = local.project
+  region              = local.region
   gcs_files           = local.gcs_config_files
   cron_pattern_backup = local.cron_pattern_backup
   timezone            = local.timezone
@@ -13,6 +14,7 @@ module "team-level" {
 
   project_id   = local.project
   team         = local.team
+  user         = local.user
   label        = local.labels
   sa_name      = local.sa_name
   display_name = local.display_name
@@ -27,6 +29,7 @@ module "user-level" {
   project_id     = local.project
   region         = local.region
   team           = local.team
+  user           = local.user
   label          = local.labels
   location       = local.zone
   instance_type  = local.instance_type
