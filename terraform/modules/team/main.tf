@@ -59,7 +59,8 @@ resource "google_storage_bucket_iam_binding" "team_collaboration" {
 
 # Team service accounts (read) user-backup bucket
 resource "google_storage_bucket_iam_binding" "user_backup" {
-  bucket  = "${var.user}-backup"
-  role    = "roles/storage.objectAdmin"
-  members = ["serviceAccount:${google_service_account.team_sa.email}"]
+  for_each = var.group_members
+  bucket   = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
+  role     = "roles/storage.objectAdmin"
+  members  = ["serviceAccount:${google_service_account.team_sa.email}"]
 }

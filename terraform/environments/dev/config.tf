@@ -69,8 +69,8 @@ locals {
 
 # static team & infrastructure config
 locals {
-  team       = "etwas"
-  module     = "003-113"
+  team       = "diybi"
+  featureid  = "003-112"
   project_id = "aliz-diybi-ia"
   region     = "europe-west1"
   zone       = "${local.region}-b"
@@ -82,7 +82,7 @@ locals {
   subnet_id         = "projects/${local.project_id}/regions/${local.region}/subnetworks/${local.subnet_name}"
   subnet_self_link  = "https://www.googleapis.com/compute/v1/${local.subnet_id}"
   labels = {
-    team   = local.team
-    module = local.module
+    team      = local.team
+    featureid = local.featureid
   }
 }
