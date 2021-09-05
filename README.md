@@ -31,9 +31,9 @@ terraform plan
 terraform apply
 ```
 
-# Create a new team
+# Create a new team and member
 open config.tf in specific environment root directory and add new group email to "groups" variable also with member email
-
+in this case terraform will add new service account, AI Notebook Instance and GCS bucket for each team members in the group
 example:
 ```shell
   groups = {
@@ -52,6 +52,37 @@ example:
       members = [
         "new-email-members@aliz.ai",
       ],
+    }
+  }
+```
+# Add Dataprep role 
+open config.tf in specific environment root directory and add new prefix for dataprep with true or false
+and you need to define dataprep custom role has created in dataprep module ```dataprep_roles = "roles/CHANGE-TO-DATAPREP-CUSTOM-ROLE"```
+
+example:
+```shell
+  groups = {
+    "ml@aliz.ai" = {
+      members = [
+        "norbert.liki@aliz.ai",
+        "tamas.moricz@aliz.ai"
+      ],
+      prefix   = "p"
+      dataprep = true
+    },
+    "infra@aliz.ai" = {
+      members = [
+        "taufik.romdony@aliz.ai",
+      ],
+      prefix   = "h"
+      dataprep = false
+    },
+    "new-email-group@aliz.ai" = {
+      members = [
+        "new-email-members@aliz.ai",
+      ],
+      prefix   = "h"
+      dataprep = false
     }
   }
 ```
