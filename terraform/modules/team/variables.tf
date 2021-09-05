@@ -1,10 +1,18 @@
 variable "project_id" {}
 variable "team" {}
-variable "label" {}
-variable "sa_name" {}
-variable "display_name" {}
-variable "roles" {}
-variable "members" {}
-variable "group_members" {
+variable "featureid" {}
+variable "environment" {}
+variable "dataprep_role" {}
+variable "group_emails" {
   type = set(string)
+}
+variable "dataprep_enable" {
+  type = set(string)
+}
+
+variable "user_group_mappings" {
+  type = map(object({
+    group_email = string
+    user_id     = string
+  }))
 }

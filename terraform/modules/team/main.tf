@@ -1,8 +1,33 @@
+resource "google_storage_hmac_key" "hmac_key" {
+  for_each              = var.group_emails
+  service_account_email = google_service_account.group_service_account[each.key].email
+  depends_on = [
+    google_service_account.group_service_account,
+  ]
+}
+
+output "hmac_secret" {
+  value = tomap({
+    for group_id, secret in google_storage_hmac_key.hmac_key : group_id => secret.secret
+  })
+}
+
+output "hmac_access_id" {
+  value = tomap({
+    for group_id, secret in google_storage_hmac_key.hmac_key : group_id => secret.access_id
+  })
+}
 resource "google_storage_bucket" "team_collaboration" {
-  name          = "${var.team}-collaboration"
+  for_each      = var.group_emails
+  name          = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-collaboration"
   location      = "EU"
   force_destroy = true
-  labels        = var.label
+  labels = {
+    featureid = var.featureid
+    env       = var.environment
+    team      = var.team
+    group     = replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")
+  }
   versioning {
     enabled = true
   }
@@ -15,52 +40,86 @@ resource "google_storage_bucket" "team_collaboration" {
     }
   }
 }
+resource "google_storage_bucket" "exasol_staging_bucket" {
+  for_each      = var.group_emails
+  name          = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-staging-exasol"
+  location      = "EU"
+  force_destroy = true
+  labels = {
+    featureid = var.featureid
+    env       = var.environment
+    team      = var.team
+    group     = replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")
+  }
+  lifecycle_rule {
+    condition {
+      age = 28
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
 
-resource "google_bigquery_dataset" "team-dataset" {
-  dataset_id                  = "team_${var.team}"
-  friendly_name               = "team-${var.team}"
-  description                 = "Team ${var.team} Dataset"
+resource "google_bigquery_dataset" "team_dataset" {
+  for_each                    = var.group_emails
+  dataset_id                  = "${var.team}_${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}"
+  friendly_name               = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}"
+  description                 = "Team ${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")} Dataset"
   location                    = "EU"
   default_table_expiration_ms = 2419200000 #(28days)
-  labels                      = var.label
+  labels = {
+    featureid = var.featureid
+    env       = var.environment
+    team      = var.team
+    group     = replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")
+  }
 }
 
-resource "google_service_account" "team_sa" {
-  account_id   = var.sa_name
-  display_name = var.display_name
+resource "google_bigquery_dataset_access" "access" {
+  //restricted access to the dataset for the group only
+  for_each       = var.group_emails
+  dataset_id     = google_bigquery_dataset.team_dataset[each.key].dataset_id
+  role           = "roles/bigquery.dataEditor"
+  group_by_email = each.key
 }
 
-resource "google_service_account_iam_member" "team_account_iam" {
-  service_account_id = google_service_account.team_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  for_each           = toset(var.members)
-  member             = each.key
+resource "google_bigquery_dataset_access" "service_account_access" {
+  //restricted access to the dataset for the service account only
+  for_each   = var.group_emails
+  dataset_id = google_bigquery_dataset.team_dataset[each.key].dataset_id
+  role       = "roles/bigquery.dataEditor"
+  iam_member = "serviceAccount:${google_service_account.group_service_account[each.key].email}"
 }
 
-resource "google_project_iam_member" "team_sa_role" {
-  for_each = toset(var.roles)
-  role     = each.key
-  member   = "serviceAccount:${google_service_account.team_sa.email}"
-}
-
-# Team service accounts (read) diy-bi-commons bucket
+# # Team service accounts (read) diy-bi-commons bucket
 resource "google_storage_bucket_iam_binding" "commons" {
-  bucket  = "${var.project_id}-commons"
-  role    = "roles/storage.objectViewer"
-  members = ["serviceAccount:${google_service_account.team_sa.email}"]
+  for_each = var.user_group_mappings
+  bucket   = "${var.project_id}-commons"
+  role     = "roles/storage.objectViewer"
+  members  = ["serviceAccount:${google_service_account.group_service_account[each.value.group_email].email}"]
 }
 
 # Team service accounts (read) team-collaboration bucket
 resource "google_storage_bucket_iam_binding" "team_collaboration" {
-  bucket  = "${var.team}-collaboration"
-  role    = "roles/storage.objectViewer"
-  members = ["serviceAccount:${google_service_account.team_sa.email}"]
+  for_each = var.group_emails
+  bucket   = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-collaboration"
+  role     = "roles/storage.objectViewer"
+  members  = ["serviceAccount:${google_service_account.group_service_account[each.key].email}"]
+}
+
+# Team service accounts (read) team-staging exasol bucket
+resource "google_storage_bucket_iam_binding" "team_staging_exasol" {
+  for_each = var.group_emails
+  bucket   = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-staging-exasol"
+  role     = "roles/storage.objectViewer"
+  members  = ["serviceAccount:${google_service_account.group_service_account[each.key].email}"]
 }
 
 # Team service accounts (read) user-backup bucket
 resource "google_storage_bucket_iam_binding" "user_backup" {
-  for_each = var.group_members
-  bucket   = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
+  for_each = var.user_group_mappings
+  bucket   = "${var.team}-${replace(replace(each.value.user_id, "/@.*/", ""), "/[\\._]/", "-")}-backup"
   role     = "roles/storage.objectAdmin"
-  members  = ["serviceAccount:${google_service_account.team_sa.email}"]
+  members  = ["serviceAccount:${google_service_account.group_service_account[each.value.group_email].email}"]
 }

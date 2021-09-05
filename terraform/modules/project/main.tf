@@ -29,7 +29,7 @@ resource "google_storage_bucket" "cf-bucket" {
 
 data "archive_file" "notebook_backup" {
   type        = "zip"
-  source_dir  = "${path.root}/../../../notebook_backup" # Directory where your Python source code is
+  source_dir  = "${path.root}/../../../notebook_backup" # Directory where Python source code is
   output_path = "${path.root}/../../../generated/notebook_backup.zip"
 }
 
@@ -39,20 +39,17 @@ resource "google_storage_bucket_object" "archive" {
   source     = "${path.root}/../../../generated/notebook_backup.zip"
   depends_on = [google_storage_bucket.cf-bucket]
 }
-
 resource "google_storage_bucket_object" "archive-commons" {
   name       = "${data.archive_file.notebook_backup.output_md5}.zip"
   bucket     = google_storage_bucket.commons.name
   source     = "${path.root}/../../../generated/notebook_backup.zip"
   depends_on = [google_storage_bucket.commons]
 }
-
 resource "google_service_account" "cf-notebook-backup-sa" {
   project      = var.project_id
   account_id   = "cf-notebook-backup-sa"
   display_name = "Terraform-managed service account for Cloud Function Notebooks Backup"
 }
-
 resource "google_project_iam_member" "cf_sa_invokers" {
   project = var.project_id
   member  = "serviceAccount:${google_service_account.cf-notebook-backup-sa.email}"
@@ -80,7 +77,6 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
   role   = "roles/cloudfunctions.invoker"
   member = "serviceAccount:${google_service_account.cf-notebook-backup-sa.email}"
 }
-
 resource "google_cloud_scheduler_job" "job" {
   name             = "notebook-backup-trigger"
   description      = "Backup Notebook"
