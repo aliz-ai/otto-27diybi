@@ -1,3 +1,4 @@
+## please disable network resources here (firewall, router, nat) if current VPC has configured
 resource "google_compute_firewall" "allow_iap_ssh" {
   name        = "allow-iap-ssh"
   description = "Allow SSH ingress from iap"
@@ -49,8 +50,8 @@ resource "google_compute_router_nat" "nat" {
 }
 
 resource "google_notebooks_instance" "instance" {
-  for_each     = var.group_members
-  name         = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-notebook"
+  for_each     = var.user_group_mappings
+  name         = "${var.team}-${replace(replace(each.value.user_id, "/@.*/", ""), "/[\\._]/", "-")}-notebook"
   provider     = google-beta
   location     = var.location
   machine_type = var.instance_type
@@ -60,22 +61,26 @@ resource "google_notebooks_instance" "instance" {
     image_family = "tf-latest-cpu"
   }
 
-  boot_disk_type      = "PD_SSD"
-  boot_disk_size_gb   = 100
-  labels              = var.label
+  boot_disk_type    = "PD_SSD"
+  boot_disk_size_gb = 100
+  labels = {
+    featureid = var.featureid
+    env       = var.environment
+    team      = var.team
+    group     = replace(replace(each.value.group_email, "/@.*/", ""), "/[\\._]/", "-")
+  }
   post_startup_script = "gs://${var.commons_bucket}/shutdown_script.sh"
 
-  no_public_ip    = true
-  no_proxy_access = true
+  no_public_ip    = false
+  no_proxy_access = false
 
   network = var.network
   subnet  = var.subnet
 
-  service_account = "team-${var.team}-sa@${var.project_id}.iam.gserviceaccount.com"
-
+  service_account = "${replace(replace(each.value.group_email, "/@.*/", "-team-sa"), "/[\\._\\+~]/", "-")}@${var.project_id}.iam.gserviceaccount.com"
   metadata = {
     proxy-mode              = "service_account"
-    gcs-data-bucket         = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
+    gcs-data-bucket         = "${var.team}-${replace(replace(each.value.user_id, "/@.*/", ""), "/[\\._]/", "-")}-backup"
     enable-guest-attributes = "true"
     framework               = "NumPy/SciPy/scikit-learn"
     installed-extensions    = "jupyterlab_bigquery-latest.tar.gz,jupyterlab_gcsfilebrowser-latest.tar.gz"
@@ -86,11 +91,16 @@ resource "google_notebooks_instance" "instance" {
 }
 
 resource "google_storage_bucket" "user-backup" {
-  for_each      = var.group_members
-  name          = "${var.team}-${replace(replace(each.key, "/@.*/", ""), "/[\\._]/", "-")}-backup"
+  for_each      = var.user_group_mappings
+  name          = "${var.team}-${replace(replace(each.value.user_id, "/@.*/", ""), "/[\\._]/", "-")}-backup"
   location      = "EU"
   force_destroy = true
-  labels        = var.label
+  labels = {
+    featureid = var.featureid
+    env       = var.environment
+    team      = var.team
+    group     = replace(replace(each.value.group_email, "/@.*/", ""), "/[\\._]/", "-")
+  }
   versioning {
     enabled = true
   }
