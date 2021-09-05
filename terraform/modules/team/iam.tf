@@ -49,10 +49,8 @@ resource "google_project_iam_custom_role" "diy_bi_notebook_user_role" {
   title       = "diy:BI AI Notebooks user"
   description = "Contains the minimal required permissions necessary for AI Notebooks with fine-grained security enabled."
   permissions = [
-    "storage.buckets.list", //list objects
-    "storage.buckets.get",  //list buckets
-    "compute.machineTypes.get",
-    "resourcemanager.projects.get",
+    "storage.buckets.list",
+    "storage.buckets.get",
     "bigquery.jobs.create",
     "bigquery.datasets.get",
     "bigquery.datasets.create",
@@ -62,12 +60,40 @@ resource "google_project_iam_custom_role" "diy_bi_notebook_user_role" {
     "bigquery.tables.get",
     "bigquery.tables.getData",
     "bigquery.tables.list",
+    "compute.machineTypes.get",
     "compute.networks.use",
     "compute.networks.access",
     "compute.networks.list",
     "compute.networks.get",
     "compute.subnetworks.use",
     "compute.subnetworks.list",
-    "compute.subnetworks.get"
+    "compute.subnetworks.get",
+    "compute.instances.get",
+    "compute.instances.list",
+    "compute.machineImages.get",
+    "compute.addresses.get",
+    "resourcemanager.projects.get",
+    "serviceusage.quotas.get",
+    "serviceusage.services.get",
+    "serviceusage.services.list",
+    "notebooks.environments.get",
+    "notebooks.environments.getIamPolicy",
+    "notebooks.environments.list",
+    "notebooks.executions.get",
+    "notebooks.executions.getIamPolicy",
+    "notebooks.executions.list",
+    "notebooks.instances.checkUpgradability",
+    "notebooks.instances.get",
+    "notebooks.instances.getHealth",
+    "notebooks.instances.getIamPolicy",
+    "notebooks.instances.list",
+    "notebooks.operations.get",
+    "notebooks.operations.list",
+    "notebooks.runtimes.get",
+    "notebooks.runtimes.getIamPolicy",
+    "notebooks.runtimes.list",
+    "notebooks.schedules.get",
+    "notebooks.schedules.getIamPolicy",
+    "notebooks.schedules.list"
   ]
 }
