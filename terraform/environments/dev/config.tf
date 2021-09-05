@@ -15,7 +15,6 @@ locals {
   iam_rule_prefix = "gcp-brain-iam"
   groups = {
     "ml@aliz.ai" = {
-      dataprep = true
       members = [
         "norbert.liki@aliz.ai"
       ],
