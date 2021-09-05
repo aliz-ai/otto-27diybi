@@ -12,42 +12,37 @@ locals {
     "00startup.py",
     "shutdown_script.sh",
   ]
-
-  sa_name      = "team-${local.team}-sa"
-  display_name = "Terraform-managed service account for ${local.team}"
-  roles = [
-    "roles/notebooks.admin",
-    "roles/storage.objectAdmin",
-    "roles/bigquery.dataOwner",
-    "roles/logging.logWriter",
-    "roles/monitoring.metricWriter",
-    "roles/stackdriver.resourceMetadata.writer",
-    "roles/storage.objectViewer",
-    "roles/monitoring.viewer"
-  ]
-
-  team_members = [
-    "user:taufik.romdony@aliz.ai",
-    "group:ml@aliz.ai"
-  ]
+  iam_rule_prefix = "gcp-brain-iam"
   groups = {
     "ml@aliz.ai" = {
+      dataprep = true
       members = [
-        "norbert.liki@aliz.ai",
-        "tamas.moricz@aliz.ai"
+        "norbert.liki@aliz.ai"
       ],
+      prefix   = "p"
+      dataprep = true
     },
     "infra@aliz.ai" = {
       members = [
-        "taufik.romdony@aliz.ai",
+        "taufik.romdony@aliz.ai"
       ],
+      prefix   = "h"
+      dataprep = false
     }
   }
+
+  dataprep_roles = "roles/CHANGE-TO-DATAPREP-CUSTOM-ROLE"
 
   group_emails = toset([
     for group_email, group_definition in local.groups :
     group_email
   ])
+
+  dataprep = compact(flatten([
+    for group_email, group_definition in local.groups : [
+      group_definition.dataprep == true ? group_email : ""
+    ]
+  ]))
 
   group_members = flatten([
     for group_email, group_definition in local.groups : [
@@ -65,6 +60,11 @@ locals {
       }
     ]
   ])
+
+  user_group_mappings_by_id = {
+    for entry in local.user_group_mappings :
+    "${entry.group_email}#${entry.user_id}" => entry
+  }
 }
 
 # static team & infrastructure config

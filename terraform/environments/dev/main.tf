@@ -12,28 +12,29 @@ module "project-level" {
 module "team-level" {
   source = "../../modules/team"
 
-  project_id    = local.project
-  team          = local.team
-  label         = local.labels
-  sa_name       = local.sa_name
-  display_name  = local.display_name
-  roles         = local.roles
-  members       = local.team_members
-  group_members = local.group_members
+  project_id          = local.project
+  team                = local.team
+  environment         = local.environment
+  featureid           = local.featureid
+  group_emails        = local.group_emails
+  dataprep_enable     = local.dataprep
+  dataprep_role       = local.dataprep_roles
+  user_group_mappings = local.user_group_mappings_by_id
 }
 
 module "user-level" {
   source = "../../modules/user"
 
-  project_id     = local.project
-  region         = local.region
-  team           = local.team
-  group_members  = local.group_members
-  label          = local.labels
-  location       = local.zone
-  instance_type  = local.instance_type
-  commons_bucket = "${local.project_id}-commons"
-  network        = local.network_id
-  subnet         = local.subnet_id
+  project_id          = local.project
+  region              = local.region
+  team                = local.team
+  environment         = local.environment
+  featureid           = local.featureid
+  user_group_mappings = local.user_group_mappings_by_id
+  location            = local.zone
+  instance_type       = local.instance_type
+  commons_bucket      = "${local.project_id}-commons"
+  network             = local.network_id
+  subnet              = local.subnet_id
 
 }
