@@ -9,7 +9,7 @@ def backup_project_notebooks(request):
     """
     from google.cloud import storage
 
-    WHITELISTED_EXTENSIONS = ['py', 'sh']
+    WHITELISTED_EXTENSIONS = ['py', 'sh', 'ipynb']
 
     def bucket_fits_schema(bucket):
         # We are assuming buckets are either in the format of teamname-personname-personal or teamname-common-team
