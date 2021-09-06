@@ -13,7 +13,7 @@ def backup_project_notebooks(request):
 
     def bucket_fits_schema(bucket):
         # We are assuming buckets are either in the format of teamname-personname-personal or teamname-common-team
-        if len(bucket.split('-')) >= 3:
+        if len(bucket.split('-')) >= 2:
             return bucket.split('-')[-1] in ['collaboration', 'backup']
         
     def blob_allowed_to_stay(blob):
@@ -31,7 +31,7 @@ def backup_project_notebooks(request):
         if personal:
             all_blobs = gcs_client.list_blobs(bucket)
             all_relevant_blobs = [blob for blob in all_blobs if blob_allowed_to_stay(blob.name)]
-            destination_bucket = gcs_client.bucket(f"{team_name}-ml-collaboration")
+            destination_bucket = gcs_client.bucket(f"{team_name}-collaboration")
 
             for blob in all_relevant_blobs:
                 bucket.copy_blob(blob, destination_bucket, f"{bucket.name}/{blob.name}")
