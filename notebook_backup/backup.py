@@ -24,14 +24,17 @@ def backup_project_notebooks(request):
     all_relevant_buckets = [bucket for bucket in all_buckets if bucket_fits_schema(bucket.name)]
 
     for bucket in all_relevant_buckets:
-        bucket_name_array = bucket.name.split('-')
-        team_name = bucket_name_array[0]
-        personal = (bucket_name_array[-1] == 'backup')
+        try: # There can be buckets that end in backup yet are not notebook backup buckets
+            bucket_name_array = bucket.name.split('-')
+            team_name = bucket_name_array[0]
+            personal = (bucket_name_array[-1] == 'backup')
 
-        if personal:
-            all_blobs = gcs_client.list_blobs(bucket)
-            all_relevant_blobs = [blob for blob in all_blobs if blob_allowed_to_stay(blob.name)]
-            destination_bucket = gcs_client.bucket(f"{team_name}-collaboration")
+            if personal:
+                all_blobs = gcs_client.list_blobs(bucket)
+                all_relevant_blobs = [blob for blob in all_blobs if blob_allowed_to_stay(blob.name)]
+                destination_bucket = gcs_client.bucket(f"{team_name}-collaboration")
 
-            for blob in all_relevant_blobs:
-                bucket.copy_blob(blob, destination_bucket, f"{bucket.name}/{blob.name}")
+                for blob in all_relevant_blobs:
+                    bucket.copy_blob(blob, destination_bucket, f"{bucket.name}/{blob.name}")
+        except:
+            pass
