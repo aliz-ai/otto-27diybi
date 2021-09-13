@@ -1,7 +1,7 @@
 import subprocess
 from google.cloud.bigquery import magics
 
-# We are assuming all notebooks have a name of teamname-personname-notebookname
+# We are assuming all notebooks have a name of teamname-personname-notebook
 output = subprocess.check_output("hostname", shell=True).decode('utf-8').split('-')
 team_name = output[0]
 person_name = output[1:-1]
