@@ -12,7 +12,7 @@ def backup_project_notebooks(request):
     WHITELISTED_EXTENSIONS = ['py', 'sh', 'ipynb']
 
     def bucket_fits_schema(bucket):
-        # We are assuming buckets are either in the format of teamname-personname-personal or teamname-common-team
+        # We are assuming buckets are either in the format of teamname-personname-backup or teamname-collaboration
         if len(bucket.split('-')) >= 2:
             return bucket.split('-')[-1] in ['collaboration', 'backup']
         
